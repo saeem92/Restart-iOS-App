@@ -36,19 +36,14 @@ how much love we put into giving.
                         .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 10)
+                    
+                     
                 }// HEADER
                 
                 //Mark: - CENTER
                 
                 ZStack{
-                    ZStack{
-                        Circle()
-                            .stroke(.white.opacity(0.2), lineWidth: 40)
-                            .frame(width: 260, height: 260, alignment: .center)
-                        Circle()
-                            .stroke(.white.opacity(0.2), lineWidth: 80)
-                            .frame(width: 260, height: 260, alignment: .center)
-                    }// Zstack
+                   
                     Image("character-1")
                         .resizable()
                         .scaledToFit()
@@ -103,6 +98,7 @@ how much love we put into giving.
                     .onTapGesture {
                         isOnboardingViewActive = false
                     }
+                        
                         
                         Spacer() // The spacer here pushed the button to the left edge and this button covers the capsule shaped beneath
                         
