@@ -58,6 +58,8 @@ how much love we put into giving.
                     Image("character-1")
                         .resizable()
                         .scaledToFit()
+                        .opacity(isAnimating ? 1 : 0)
+                        .animation(.easeOut(duration: 0.5), value: isAnimating)
                 }// Center
                 
                 Spacer() // This spacer pushes up the header.
@@ -116,11 +118,14 @@ how much love we put into giving.
                             // gesture.translation.width > 0 This property means that user can move button from left to right initially. so this statement is saying it will only run when the dragging has been started in the right direction.
                         }
                         .onEnded{ _ in
-                            if buttonOffset > buttonWidth / 2 {
-                                buttonOffset = buttonWidth - 80
-                                isOnboardingViewActive = false
-                            } else {
-                                buttonOffset = 0
+                            withAnimation(Animation.easeOut(duration: 0.4)) {
+                                if buttonOffset > buttonWidth / 2 {
+                                    buttonOffset = buttonWidth - 80
+                                    isOnboardingViewActive = false
+                                    
+                                } else {
+                                     buttonOffset = 0
+                                }
                             }
                             
                         }
@@ -134,7 +139,9 @@ how much love we put into giving.
                     
                 }//:Footer
                 .frame(width: buttonWidth,height: 80, alignment: .center)
-                .padding()
+                .padding(isAnimating ? 1 : 0)
+                .offset(y: isAnimating ? 0 : 40)
+                .animation(.easeOut(duration: 1), value: isAnimating)
                 // .frame here is a modifier to the container to navigate the cursor to the end of the z
             }//: Vstack
         }//: Zstack
