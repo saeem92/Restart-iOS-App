@@ -8,15 +8,20 @@
 import SwiftUI
 
 struct OnboardingView: View {
+    //MARK: - PROPERTY
     @AppStorage("onboarding") var isOnboardingViewActive: Bool = true
     // App storage property wrapper is used to store edit and recall its value using the device permanent storage.
+    @State private var buttonWidth: Double = UIScreen.main.bounds.width - 80
+    @State private var buttonOffset: CGFloat = 0 // This property is respresenting the asset value in the horizontal direction.
+    @State private var isAnimating: Bool = false
+    
     
     var body: some View {
         ZStack {
             Color("ColorBlue")
                 .ignoresSafeArea(.all, edges: .all)
             VStack(spacing:20) {
-               // Mark: - HEADER
+               // MARK: - HEADER
                 
                 Spacer()
                 
@@ -39,11 +44,17 @@ how much love we put into giving.
                     
                      
                 }// HEADER
+                .opacity(isAnimating ? 1 : 0) // Here I am using a ternary operator (A ternary operator is a special phrase that we use to check and change values)
+                // The above code is saying if the animation variable is true then the opacity value is 1 and if the animation variable value is value then the opacity value is zero.
+                .offset(y: isAnimating ? 0 : -40)
                 
-                //Mark: - CENTER
+                .animation(.easeInOut(duration: 1), value: isAnimating) // This line is an animation paramenter we I decided to add an easy out animation curve type This ease out slows down at the end of the animation with a predefined one second duration
+                
+                
+                //MARK: - CENTER
                 
                 ZStack{
-                   
+                    CircleGroupView(ShapeColor: .white, ShapeOpacity: 0.2)
                     Image("character-1")
                         .resizable()
                         .scaledToFit()
@@ -75,7 +86,7 @@ how much love we put into giving.
                     HStack{
                         Capsule()
                             .fill(Color("ColorRed"))
-                            .frame(width: 80)
+                            .frame(width: buttonOffset + 80)
                         
             Spacer() // This is pushing our button to the a starting point.
                         
@@ -95,9 +106,25 @@ how much love we put into giving.
                         }
                         .foregroundColor(.white)
                     .frame(width: 80, height: 80, alignment: .center)
-                    .onTapGesture {
-                        isOnboardingViewActive = false
-                    }
+                    .offset(x: buttonOffset)
+                    .gesture(
+                    DragGesture()
+                        .onChanged{gesture in /* This value will give us information about actual movement */
+                            if gesture.translation.width > 0 && buttonOffset <= buttonWidth - 80{
+                                buttonOffset = gesture.translation.width // This property is capturing the actual drag movement's width for later use.
+                            }
+                            // gesture.translation.width > 0 This property means that user can move button from left to right initially. so this statement is saying it will only run when the dragging has been started in the right direction.
+                        }
+                        .onEnded{ _ in
+                            if buttonOffset > buttonWidth / 2 {
+                                buttonOffset = buttonWidth - 80
+                                isOnboardingViewActive = false
+                            } else {
+                                buttonOffset = 0
+                            }
+                            
+                        }
+                    ) //: GESTURE
                         
                         
                         Spacer() // The spacer here pushed the button to the left edge and this button covers the capsule shaped beneath
@@ -106,11 +133,14 @@ how much love we put into giving.
                     
                     
                 }//:Footer
-                .frame(height: 80, alignment: .center)
+                .frame(width: buttonWidth,height: 80, alignment: .center)
                 .padding()
                 // .frame here is a modifier to the container to navigate the cursor to the end of the z
             }//: Vstack
         }//: Zstack
+        .onAppear(perform: {
+            isAnimating = true
+        })
     }
 }
 // Vstack is a verticla stack container this will allow us to add more views after each other.
