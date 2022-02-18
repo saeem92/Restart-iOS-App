@@ -15,6 +15,10 @@ struct OnboardingView: View {
     @State private var buttonOffset: CGFloat = 0 // This property is respresenting the asset value in the horizontal direction.
     @State private var isAnimating: Bool = false
     @State private var imageOffset: CGSize = .zero
+    @State private var indicatorOpacity: Double = 1.0
+    @State private var textTitle: String = "Share."
+    
+    let hapticFeedback = UINotificationFeedbackGenerator()
     
     
     var body: some View {
@@ -27,10 +31,12 @@ struct OnboardingView: View {
                 Spacer()
                 
                 VStack(spacing:0){
-                    Text("Share.")
+                    Text(textTitle)
                         .font(.system(size: 60))
                         .fontWeight(.heavy)
                         .foregroundColor(.white)
+                        .transition(.opacity)
+                        .id(textTitle) // We use the id Method to tell SwiftUI that a view is no longer the same view
                     
                     Text("""
 It's not how much we give but
@@ -74,13 +80,31 @@ how much love we put into giving.
                             if abs (imageOffset.width) <= 150 {
                                 imageOffset = gesture.translation
                                 // abs generic function returns the absolute value of the given number, the reason behind is when the user drag to the left direction, then this with value goes to the negative number
+                                withAnimation(.linear(duration: 0.25)){
+                                    indicatorOpacity = 0
+                                }
                             }
                         } .onEnded{ _ in
                             imageOffset = .zero
+                            
+                            withAnimation(.linear(duration: 0.25)){
+                                indicatorOpacity = 1
+                                textTitle = "Share." // with this code we change the value of the text view back and forth when users start and stop dragging the screen.
+                            }
                         }
                         )
                         .animation(.easeOut(duration: 1), value: imageOffset)
                 }// Center
+                .overlay(
+                Image(systemName: "arrow.left.and.right.circle")
+                    .font(.system(size: 44, weight: .ultraLight))
+                    .foregroundColor(.white)
+                    .foregroundColor(.white)
+                    .offset(y: 20)
+                    .animation(.easeOut(duration: 1).delay(2), value: isAnimating)
+                    .opacity(indicatorOpacity)
+                , alignment: .bottom // As you can see with this alignment parameter, we repositioned the arrow symbol as we wanted.
+                )
                 
                 Spacer() // This spacer pushes up the header.
                 
@@ -140,10 +164,13 @@ how much love we put into giving.
                         .onEnded{ _ in
                             withAnimation(Animation.easeOut(duration: 0.4)) {
                                 if buttonOffset > buttonWidth / 2 {
+                                    hapticFeedback.notificationOccurred(.success)
+                                    playSound(sound: "chimeup", type: "mp3")
                                     buttonOffset = buttonWidth - 80
                                     isOnboardingViewActive = false
                                     
                                 } else {
+                                    hapticFeedback.notificationOccurred(.warning)
                                      buttonOffset = 0
                                 }
                             }
@@ -168,6 +195,7 @@ how much love we put into giving.
         .onAppear(perform: {
             isAnimating = true
         })
+        .preferredColorScheme(.dark) // Here we are telling the program to run dark color theme
     }
 }
 // Vstack is a verticla stack container this will allow us to add more views after each other.
